@@ -1,6 +1,6 @@
 // global variable declaration
-let count = 0;
-let timer;
+// let count = 0;
+// let timer;
 let quizData;
 let answers = [];
 
@@ -9,7 +9,7 @@ let startQuiz = document.querySelector("#startQuiz");
 let rulesContainer = document.querySelector("#rulesContainer");
 let alertContainer = document.querySelector("#alertContainer");
 let submitContainer = document.querySelector("#submitContainer");
-let quizContainer = document.querySelector("#quizContainer");
+let quizContainer = document.querySelector(".quizContainer");
 let answersContainer = document.querySelector("#answersContainer");
 let displayResult = document.querySelector("#displayResult");
 
@@ -23,8 +23,8 @@ startQuiz.addEventListener("click", () => {
 
   let x = setInterval(() => {
     if (counterNum < 0) {
-      coutDown.classList.remove("flex");
-      coutDown.classList.add("hidden");
+      countDown.classList.remove("flex");
+      countDown.classList.add("hidden");
       counterNum = 3;
       count = 0;
       timer = null;
@@ -46,7 +46,7 @@ startQuiz.addEventListener("click", () => {
 // All quiz data fetched from json
 const loadQuiz = async () => {
   const res = await fetch("./data/quiz.json");
-  const data = await res.json;
+  const data = await res.json();
   quizData = data;
   displayQuiz(data);
 };
@@ -58,31 +58,101 @@ const displayQuiz = (data) => {
     return;
   }
 
-  data.forEach((quiz, i) => {
-    quizContainer.innerHTML += `<div class="m-3 py-3 px-4 shadow-sm rounded">
-  <div class="flex items-center">
-    <div class="h-8 w-8 bg-green-300 rounded-full flex justify-center items-center text-green-800 mr-3">
-      ${i + 1}
+  quizContainer.innerHTML = data
+    .map(
+      (quiz, i) => `<div class="m-3 py-3 px-4 shadow-sm rounded">
+    <div class="flex items-center">
+      <div class="h-8 w-8 bg-green-300 rounded-full flex justify-center items-center text-green-800 mr-3">
+        ${i + 1}
+      </div>
+      <p class="text-gray-800 text-sm">${quiz.question}</p>
     </div>
-    <p class="text-gray-800 text-sm">${quiz.quetion}</p>
-  </div>
-  <div class="grid grid-cols-2 gap-4 mt-5">
-    ${displayQuizOptions(quiz.options, i)}
-  </div>
-</div>`;
-  });
+    <div class="grid grid-cols-2 gap-4 mt-5">
+      ${displayQuizOptions(quiz.options, i)}
+    </div>
+  </div>`
+    )
+    .join("");
+};
+
+// Function to display quiz options
+const displayQuizOptions = (options, index) => {
+  return options
+    .map(
+      (option, i) => `<div class="py-1 px-2 rounded border ${
+        answers[index]?.givenAns === option
+          ? answers[index]?.givenAns === quizData[index]?.answer
+            ? "bg-green-200 border-green-500"
+            : "bg-red-200 border-red-500"
+          : "bg-gray-100 border-gray-300"
+      }">
+    <label>
+      <input
+        type="radio"
+        class="hidden"
+        name="q${index}"
+        value="${option}"
+        onchange="handleAnswerChange(${index}, '${option}')"
+        ${answers[index]?.givenAns === option ? "checked" : ""}
+      />
+      ${option}
+    </label>
+  </div>`
+    )
+    .join("");
+};
+
+// Function to handle answer change
+const handleAnswerChange = (index, option) => {
+  answers[index] = { answer: quizData[index]?.answer, givenAns: option };
+};
+
+// Function to display quiz timer
+const quizTimer = (reset = false) => {
+  let minutes = 1;
+  let seconds = 0;
+
+  if (reset) {
+    clearInterval(timer);
+    timer = null;
+  }
+
+  if (!timer) {
+    timer = setInterval(() => {
+      if (seconds === 0) {
+        minutes--;
+        seconds = 59;
+      } else {
+        seconds--;
+      }
+
+      if (minutes === 0 && seconds === 0) {
+        clearInterval(timer);
+        document.querySelector("#submit").click();
+      }
+
+      displayTime(minutes, seconds);
+    }, 1000);
+  }
+};
+
+// Function to display time
+const displayTime = (minutes, seconds) => {
+  const timerElement = document.querySelector("#count");
+  timerElement.innerText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
 // EventListener for quiz submit button
-document.querySelector("#submit").addEventlistener("click", () => {
+document.querySelector("#submit").addEventListener("click", () => {
   if (answers.length < 6) {
+    alert("Please answer all questions before submitting.");
     return;
   }
   quizTimer(true);
   answersContainer.innerHTML = `<div class="my-4">
-  <i class="fa-solid fa-fan animate-spin text-2xl text-green-600"></i>
-  <p class="text-xs animate-pulse">Please Wait, We are checking...</p>
-</div>`;
+    <i class="fa-solid fa-fan animate-spin text-2xl text-green-600"></i>
+    <p class="text-xs animate-pulse">Please Wait, We are checking...</p>
+  </div>`;
   let timeTaken = document.querySelector("#count");
   let totalMark = 0;
   let grade = {
@@ -111,7 +181,7 @@ document.querySelector("#submit").addEventlistener("click", () => {
   let storage = JSON.parse(localStorage.getItem("result"));
   if (storage) {
     localStorage.setItem(
-      "results",
+      "result",
       JSON.stringify([
         ...storage,
         {
@@ -123,7 +193,7 @@ document.querySelector("#submit").addEventlistener("click", () => {
     );
   } else {
     localStorage.setItem(
-      "results",
+      "result",
       JSON.stringify([
         {
           marks: totalMark,
@@ -138,48 +208,92 @@ document.querySelector("#submit").addEventlistener("click", () => {
   let x = setTimeout(() => {
     showAnswers(answers);
     displayResult.innerHTML = `<div
-    class="h-[220px] w-[220px] mx-auto mt-8 flex flex-col justify-center border-2 rounded-tr-[50%] rounded-bl-[50%]"
-  >
-    <h3 class="text-xl ${grade.color}">${grade.status}</h3>
-    <h1 class="text-3xl font-bold my-2">
-      ${totalMark}<span class="text-slate-800">/60</span>
-    </h1>
-    <p class="text-sm flex justify-center items-center gap-2">
-      Total Time: <span class="text-xl text-orange-500">${timeTaken.innerText.replace(
-        "sec",
-        ""
-      )}<span class="text-xs">sec</span></span>
-    </p>
-  </div>
-  
-  <button onclick="location.reload();" class="bg-green-600 text-white w-full py-2 rounded mt-16">Restart</button>
-  ${
-    storage
-      ? `<div class="mt-5">
-      <h1 class="text-center">Previous Submissions <button class="text-blue-800 text-xs" onclick={localStorage.clear();location.reload()}>Clear History</button></h1>
-    <div
-    class="flex justify-between items-center border rounded p-2 my-2 shadow-sm font-medium">
-    <div>Marks</div>
-    <div>Grade</div>
-    <div>Time</div>
+      class="h-[220px] w-[220px] mx-auto mt-8 flex flex-col justify-center border-2 rounded-tr-[50%] rounded-bl-[50%]"
+    >
+      <h3 class="text-xl ${grade.color}">${grade.status}</h3>
+      <h1 class="text-3xl font-bold my-2">
+        ${totalMark}<span class="text-slate-800">/60</span>
+      </h1>
+      <p class="text-sm flex justify-center items-center gap-2">
+        Total Time: <span class="text-xl text-orange-500">${timeTaken.innerText.replace("sec", "")}<span class="text-xs">sec</span></span>
+      </p>
     </div>
-    ${storage
-      ?.reverse()
-      ?.map(
-        (item) => `<div
-      class="flex justify-between items-center border rounded p-2 my-2 shadow-sm">
-      <div>${item.marks}/60</div>
-      <div>${item.status}</div>
-      <div>${item.examTime}</div>
-      </div>`
-      )
-      ?.join("")}`
-      : ""
-  }
-  </div>
-  `;
 
-    clearTimeout(x);
-  }, 1500);
-  window.scrollTo(0, 0);
+    <button onclick="location.reload()" class="bg-green-600 text-white w-full py-2 rounded my-4">
+      Try Again
+    </button>`;
+  }, 2000);
 });
+
+// Function to show answers on submit
+const showAnswers = (answers) => {
+  answersContainer.innerHTML = answers
+    .map(
+      (ans, i) => `<div class="my-3">
+    <p class="text-gray-800 text-sm font-bold">Question ${i + 1}</p>
+    <p class="text-sm">${quizData[i].question}</p>
+    <p class="text-xs my-1">Correct Answer: <span class="text-green-600">${quizData[i].answer}</span></p>
+    <p class="text-xs mb-2">Your Answer: <span class="text-red-600">${ans.givenAns}</span></p>
+    <div class="grid grid-cols-2 gap-4">
+      ${quizData[i].options
+        .map(
+          (opt) =>
+            `<div class="py-1 px-2 rounded ${
+              ans.givenAns === opt
+                ? ans.givenAns === quizData[i].answer
+                  ? "bg-green-200 border-green-500"
+                  : "bg-red-200 border-red-500"
+                : "bg-gray-100 border-gray-300"
+            }">
+            <label>
+              <input
+                type="radio"
+                class="hidden"
+                name="q${i}"
+                value="${opt}"
+                ${ans.givenAns === opt ? "checked" : ""}
+              />
+              ${opt}
+            </label>
+          </div>`
+        )
+        .join("")}
+    </div>
+  </div>`
+    )
+    .join("");
+};
+
+// Function to start the countdown and show the quiz section after finishing the countdown
+document.addEventListener("DOMContentLoaded", function () {
+  const startQuizButton = document.getElementById("startQuiz");
+  const countDownContainer = document.getElementById("countDownContainer");
+  const submitContainer = document.getElementById("submitContainer");
+
+  function startCountdown() {
+    let counter = 3;
+    const counterElement = document.getElementById("counter");
+
+    const intervalId = setInterval(() => {
+      counterElement.textContent = counter;
+      counter--;
+
+      if (counter < 0) {
+        clearInterval(intervalId);
+        countDownContainer.classList.add("hidden");
+        submitContainer.classList.remove("hidden");
+      }
+    }, 1000);
+  }
+
+  startQuizButton.addEventListener("click", function () {
+    const rulesContainer = document.getElementById("rulesContainer");
+    rulesContainer.classList.add("hidden");
+    countDownContainer.classList.remove("hidden");
+
+    startCountdown();
+  });
+});
+
+// Load the quiz when the page is loaded
+document.addEventListener("DOMContentLoaded", loadQuiz);
