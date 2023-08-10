@@ -58,20 +58,16 @@ const loadQuiz = async () => {
 };
 // Displaying quiz on quiz page
 const displayQuiz = (data) => {
+  const quizContainer = document.querySelector("#quizContainer");
+  quizContainer.innerHTML = ""; // Clear existing content
+
   if (!data) {
     quizContainer.innerHTML = "<p>No quiz data available.</p>";
     return;
   }
 
-  quizContainer.innerHTML = ""; // Clear existing content
-
   data.forEach((quiz, i) => {
-    const optionsHTML = quiz.options
-      .map((option, index) => {
-        return `<div class="option">${option}</div>`;
-      })
-      .join("");
-
+    const optionsHTML = displayQuizOptions(quiz.options, i);
     const questionHTML = `
       <div class="m-3 py-3 px-4 shadow-sm rounded">
         <div class="flex items-center">
@@ -85,10 +81,10 @@ const displayQuiz = (data) => {
         </div>
       </div>
     `;
-
     quizContainer.innerHTML += questionHTML;
   });
 };
+
 
 const displayQuizOptions = (options, questionIndex) => {
   return options
@@ -98,7 +94,7 @@ const displayQuizOptions = (options, questionIndex) => {
           <input
             type="radio"
             name="question_${questionIndex}"
-            value="${option}"
+            value="${optionIndex}" 
             class="mr-2"
           />
           ${option}
