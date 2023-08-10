@@ -1,205 +1,41 @@
-
-// let quizData;
-// let answers = [];
-
-
-// let startQuiz = document.getElementById("startQuiz");
-// let rulesContainer = document.getElementById("rulesContainer");
-// let countDownContainer = document.getElementById("countDownContainer");
-// let submitContainer = document.getElementById("submitContainer");
-// let quizContainer = document.querySelector(".quizContainer");
-// let answersContainer = document.getElementById("answersContainer");
-// let displayResult = document.getElementById("displayResult");
-
-
-// startQuiz.addEventListener("click", () => {
-//   let counter = document.getElementById("counter");
-//   let counterNum = 3;
-//   countDownContainer.classList.remove("hidden");
-//   countDownContainer.classList.add("flex");
-
-//   let x = setInterval(() => {
-//     if (counterNum < 0) {
-//       countDownContainer.classList.remove("flex");
-//       countDownContainer.classList.add("hidden");
-//       counterNum = 3;
-//       quizData = null;
-//       answers = [];
-//       rulesContainer.classList.add("hidden");
-//       submitContainer.classList.remove("hidden");
-//       submitContainer.classList.add("flex");
-//       loadQuiz();
-//       clearInterval(x);
-//     }
-//     counter.innerText = counterNum;
-//     counterNum--;
-//   }, 1000);
-// });
-
-
-// const loadQuiz = async () => {
-//   const res = await fetch("./data/quiz.json");
-//   const data = await res.json();
-//   quizData = data;
-//   displayQuiz(data);
-// };
-
-
-// const displayQuiz = (data) => {
-//   if (!data) {
-//     quizContainer.innerHTML = "";
-//     return;
-//   }
-
-//   quizContainer.innerHTML = data
-//     .map(
-//       (quiz, i) => `<div class="m-3 py-3 px-4 shadow-sm rounded">
-//     <div class="flex items-center">
-//       <div class="h-8 w-8 bg-green-300 rounded-full flex justify-center items-center text-green-800 mr-3">
-//         ${i + 1}
-//       </div>
-//       <p class="text-gray-800 text-sm">${quiz.question}</p>
-//     </div>
-//     <div class="grid grid-cols-2 gap-4 mt-5">
-//       ${displayQuizOptions(quiz.options, i)}
-//     </div>
-//   </div>`
-//     )
-//     .join("");
-// };
-
-// const displayQuizOptions = (options, index) => {
-//   return options
-//     .map(
-//       (option, i) => `<div class="py-1 px-2 rounded border ${
-//         answers[index]?.givenAns === option
-//           ? answers[index]?.givenAns === quizData[index]?.answer
-//             ? "bg-green-200 border-green-500"
-//             : "bg-red-200 border-red-500"
-//           : "bg-gray-100 border-gray-300"
-//       }">
-//     <label>
-//       <input
-//         type="radio"
-//         class="hidden"
-//         name="q${index}"
-//         value="${option}"
-//         onchange="handleAnswerChange(${index}, '${option}')"
-//         ${answers[index]?.givenAns === option ? "checked" : ""}
-//       />
-//       ${option}
-//     </label>
-//   </div>`
-//     )
-//     .join("");
-// };
-
-// // Function to handle answer change
-// const handleAnswerChange = (index, option) => {
-//   answers[index] = { answer: quizData[index]?.answer, givenAns: option };
-// };
-
-// // EventListener for quiz submit button
-// document.getElementById("submit").addEventListener("click", () => {
-//   if (answers.length < 6) {
-//     alert("Please answer all questions before submitting.");
-//     return;
-//   }
-//   answersContainer.innerHTML = `<div class="my-4">
-//     <i class="fa-solid fa-fan animate-spin text-2xl text-green-600"></i>
-//     <p class="text-xs animate-pulse">Please Wait, We are checking...</p>
-//   </div>`;
-//   let timeTaken = document.getElementById("counter");
-//   let totalMark = 0;
-//   let grade = {
-//     status: "",
-//     color: "",
-//   };
-
-//   for (let ans of answers) {
-//     if (ans.answer === ans.givenAns) {
-//       totalMark += 10;
-//     }
-//   }
-
-//   if (totalMark === 60) {
-//     grade.status = "Excellent";
-//     grade.color = "text-green-600";
-//   } else if (totalMark >= 40) {
-//     grade.status = "Good";
-//     grade.color = "text-blue-600";
-//   } else if (totalMark >= 20) {
-//     grade.status = "Average";
-//     grade.color = "text-yellow-600";
-//   } else {
-//     grade.status = "Below Average";
-//     grade.color = "text-red-600";
-//   }
-
-//   setTimeout(() => {
-//     answersContainer.innerHTML = "";
-//     displayResult.innerHTML = `
-//       <div class="bg-white p-4 shadow-md rounded-md">
-//         <h3 class="text-xl font-semibold mb-4">Result</h3>
-//         <p class="mb-2">Total Correct Answers: <strong>${totalMark / 10}</strong></p>
-//         <p class="mb-4">Time Taken: <strong>${timeTaken.innerText}</strong></p>
-//         <p class="mb-2">Grade: <strong class="${grade.color}">${grade.status}</strong></p>
-//         <button
-//           id="retry"
-//           class="px-4 py-2 bg-green-600 text-white rounded-md"
-//           onclick="retryQuiz()"
-//         >
-//           Retry Quiz
-//         </button>
-//       </div>
-//     `;
-//     displayResult.classList.remove("hidden");
-//   }, 3000);
-// });
-
-// // Retry Quiz
-// const retryQuiz = () => {
-//   answers = [];
-//   displayResult.classList.add("hidden");
-//   rulesContainer.classList.remove("hidden");
-//   submitContainer.classList.add("hidden");
-// };
-
-// // Initial load of quiz
-// loadQuiz();
-
-
-/// Global variable declaration
+// global variable declaration
+let count = 0;
+let timer;
 let quizData;
 let answers = [];
 
-// DOM elements called
-let startQuiz = document.getElementById("startQuiz");
-let rulesContainer = document.getElementById("rulesContainer");
-let countDownContainer = document.getElementById("countDownContainer");
-let submitContainer = document.getElementById("submitContainer");
-let quizContainer = document.querySelector(".quizContainer");
-let answersContainer = document.getElementById("answersContainer");
-let displayResult = document.getElementById("displayResult");
+// Dom elements called
+let startQuiz = document.querySelector("#startQuiz");
+let rulesContainer = document.querySelector("#rulesContainer");
+let alertContainer = document.querySelector("#alertContainer");
+let submitContainer = document.querySelector("#submitContainer");
+let quizContainer = document.querySelector("#quizContainer");
+let answersContainer = document.querySelector("#answersContainer");
+let displayResult = document.querySelector("#displayResult");
 
 // EventListener for quiz start button
 startQuiz.addEventListener("click", () => {
-  let counter = document.getElementById("counter");
-  let counterNum = 3;
-  countDownContainer.classList.remove("hidden");
-  countDownContainer.classList.add("flex");
+  let countDown = document.querySelector("#countDownContainer");
+  let counter = document.querySelector("#counter");
+  let counterNum = 2;
+  countDown.classList.remove("hidden");
+  countDown.classList.add("flex");
 
   let x = setInterval(() => {
     if (counterNum < 0) {
-      countDownContainer.classList.remove("flex");
-      countDownContainer.classList.add("hidden");
+      countDown.classList.remove("flex"); // Corrected spelling
+      countDown.classList.add("hidden"); // Corrected spelling
       counterNum = 3;
+      count = 0;
+      timer = null;
       quizData = null;
       answers = [];
       rulesContainer.classList.add("hidden");
+      alertContainer.classList.remove("hidden");
       submitContainer.classList.remove("hidden");
       submitContainer.classList.add("flex");
       loadQuiz();
+      quizTimer();
       clearInterval(x);
     }
     counter.innerText = counterNum;
@@ -207,81 +43,84 @@ startQuiz.addEventListener("click", () => {
   }, 1000);
 });
 
-// All quiz data fetched from JSON
-const loadQuiz = async () => {
-  const res = await fetch("./data/quiz.json");
-  const data = await res.json();
-  quizData = data;
-  displayQuiz(data);
-};
 
+// All quiz data fetched from json
+const loadQuiz = async () => {
+  try {
+    const res = await fetch("./data/quiz.json");
+    const data = await res.json();
+    console.log(data);
+    quizData = data;
+    displayQuiz(data);
+  } catch (error) {
+    console.error("Error loading quiz data:", error);
+  }
+};
 // Displaying quiz on quiz page
 const displayQuiz = (data) => {
   if (!data) {
-    quizContainer.innerHTML = "";
+    quizContainer.innerHTML = "<p>No quiz data available.</p>";
     return;
   }
 
-  quizContainer.innerHTML = data
-    .map(
-      (quiz, i) => `<div class="m-3 py-3 px-4 shadow-sm rounded">
-    <div class="flex items-center">
-      <div class="h-8 w-8 bg-green-300 rounded-full flex justify-center items-center text-green-800 mr-3">
-        ${i + 1}
+  quizContainer.innerHTML = ""; // Clear existing content
+
+  data.forEach((quiz, i) => {
+    const optionsHTML = quiz.options
+      .map((option, index) => {
+        return `<div class="option">${option}</div>`;
+      })
+      .join("");
+
+    const questionHTML = `
+      <div class="m-3 py-3 px-4 shadow-sm rounded">
+        <div class="flex items-center">
+          <div class="h-8 w-8 bg-green-300 rounded-full flex justify-center items-center text-green-800 mr-3">
+            ${i + 1}
+          </div>
+          <p class="text-gray-800 text-sm">${quiz.question}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-5">
+          ${optionsHTML}
+        </div>
       </div>
-      <p class="text-gray-800 text-sm">${quiz.question}</p>
-    </div>
-    <div class="grid grid-cols-2 gap-4 mt-5">
-      ${displayQuizOptions(quiz.options, i)}
-    </div>
-  </div>`
-    )
-    .join("");
+    `;
+
+    quizContainer.innerHTML += questionHTML;
+  });
 };
 
-// Function to display quiz options
-const displayQuizOptions = (options, index) => {
+const displayQuizOptions = (options, questionIndex) => {
   return options
-    .map(
-      (option, i) => `<div class="py-1 px-2 rounded border ${
-        answers[index]?.givenAns === option
-          ? answers[index]?.givenAns === quizData[index]?.answer
-            ? "bg-green-200 border-green-500"
-            : "bg-red-200 border-red-500"
-          : "bg-gray-100 border-gray-300"
-      }">
-    <label>
-      <input
-        type="radio"
-        class="hidden"
-        name="q${index}"
-        value="${option}"
-        onchange="handleAnswerChange(${index}, '${option}')"
-        ${answers[index]?.givenAns === option ? "checked" : ""}
-      />
-      ${option}
-    </label>
-  </div>`
-    )
+    .map((option, optionIndex) => {
+      return `
+        <label class="flex items-center">
+          <input
+            type="radio"
+            name="question_${questionIndex}"
+            value="${option}"
+            class="mr-2"
+          />
+          ${option}
+        </label>
+      `;
+    })
     .join("");
 };
 
-// Function to handle answer change
-const handleAnswerChange = (index, option) => {
-  answers[index] = { answer: quizData[index]?.answer, givenAns: option };
-};
+
 
 // EventListener for quiz submit button
-document.getElementById("submit").addEventListener("click", () => {
+document.querySelector("#submit").addEventListener("click", () => {
   if (answers.length < 6) {
-    alert("Please answer all questions before submitting.");
     return;
   }
+  quizTimer(true);
   answersContainer.innerHTML = `<div class="my-4">
-    <i class="fa-solid fa-fan animate-spin text-2xl text-green-600"></i>
-    <p class="text-xs animate-pulse">Please Wait, We are checking...</p>
-  </div>`;
-  let timeTaken = document.getElementById("counter");
+  <i class="fa-solid fa-fan animate-spin text-2xl text-green-600"></i>
+  <p class="text-xs animate-pulse">Please Wait, We are checking...</p>
+</div>`;
+  let timeTaken = document.querySelector("#count");
   let totalMark = 0;
   let grade = {
     status: "",
@@ -297,45 +136,87 @@ document.getElementById("submit").addEventListener("click", () => {
   if (totalMark === 60) {
     grade.status = "Excellent";
     grade.color = "text-green-600";
-  } else if (totalMark >= 40) {
+  } else if (totalMark >= 40 && totalMark < 60) {
     grade.status = "Good";
-    grade.color = "text-blue-600";
-  } else if (totalMark >= 20) {
-    grade.status = "Average";
-    grade.color = "text-yellow-600";
+    grade.color = "text-orange-600";
   } else {
-    grade.status = "Below Average";
+    grade.status = "Poor";
     grade.color = "text-red-600";
   }
 
-  setTimeout(() => {
-    answersContainer.innerHTML = ""; // Clear the previous loading message
-    displayResult.innerHTML = `
-      <div class="bg-white p-4 shadow-md rounded-md">
-        <h3 class="text-xl font-semibold mb-4">Result</h3>
-        <p class="mb-2">Total Correct Answers: <strong>${totalMark / 10}</strong></p>
-        <p class="mb-4">Time Taken: <strong>${timeTaken.innerText}</strong></p>
-        <p class="mb-2">Grade: <strong class="${grade.color}">${grade.status}</strong></p>
-        <button
-          id="retry"
-          class="px-4 py-2 bg-green-600 text-white rounded-md"
-          onclick="retryQuiz()"
-        >
-          Retry Quiz
-        </button>
-      </div>
-    `;
-    displayResult.classList.remove("hidden");
-  }, 3000);
+  // data setting on local storage and getting data from local storage
+  let storage = JSON.parse(localStorage.getItem("result"));
+  if (storage) {
+    localStorage.setItem(
+      "results",
+      JSON.stringify([
+        ...storage,
+        {
+          marks: totalMark,
+          examTime: timeTaken.innerText,
+          status: grade.status,
+        },
+      ])
+    );
+  } else {
+    localStorage.setItem(
+      "results",
+      JSON.stringify([
+        {
+          marks: totalMark,
+          examTime: timeTaken.innerText,
+          status: grade.status,
+        },
+      ])
+    );
+  }
+
+  // Right side bar/ answer section
+  let x = setTimeout(() => {
+    showAnswers(answers);
+    displayResult.innerHTML = `<div
+    class="h-[220px] w-[220px] mx-auto mt-8 flex flex-col justify-center border-2 rounded-tr-[50%] rounded-bl-[50%]"
+  >
+    <h3 class="text-xl ${grade.color}">${grade.status}</h3>
+    <h1 class="text-3xl font-bold my-2">
+      ${totalMark}<span class="text-slate-800">/60</span>
+    </h1>
+    <p class="text-sm flex justify-center items-center gap-2">
+      Total Time: <span class="text-xl text-orange-500">${timeTaken.innerText.replace(
+        "sec",
+        ""
+      )}<span class="text-xs">sec</span></span>
+    </p>
+  </div>
+  
+  <button onclick="location.reload();" class="bg-green-600 text-white w-full py-2 rounded mt-16">Restart</button>
+  ${
+    storage
+      ? `<div class="mt-5">
+      <h1 class="text-center">Previous Submissions <button class="text-blue-800 text-xs" onclick={localStorage.clear();location.reload()}>Clear History</button></h1>
+    <div
+    class="flex justify-between items-center border rounded p-2 my-2 shadow-sm font-medium">
+    <div>Marks</div>
+    <div>Grade</div>
+    <div>Time</div>
+    </div>
+    ${storage
+      ?.reverse()
+      ?.map(
+        (item) => `<div
+      class="flex justify-between items-center border rounded p-2 my-2 shadow-sm">
+      <div>${item.marks}/60</div>
+      <div>${item.status}</div>
+      <div>${item.examTime}</div>
+      </div>`
+      )
+      ?.join("")}`
+      : ""
+  }
+  </div>
+  `;
+
+    clearTimeout(x);
+  }, 1500);
+  window.scrollTo(0, 0);
 });
-
-// Retry Quiz
-const retryQuiz = () => {
-  answers = [];
-  displayResult.classList.add("hidden");
-  rulesContainer.classList.remove("hidden");
-  submitContainer.classList.add("hidden");
-};
-
-// Initial load of quiz
-loadQuiz();
